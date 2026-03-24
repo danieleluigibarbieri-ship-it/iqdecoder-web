@@ -20,7 +20,7 @@ export type Attempt = {
 export type Payment = {
   id: string;
   attempt_id: string;
-  stripe_session_id: string;
+  stripe_checkout_session_id: string;
   stripe_payment_intent_id?: string;
   amount: number;
   currency: string;

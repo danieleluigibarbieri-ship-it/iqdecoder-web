@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
             stripe_payment_intent_id: paymentIntentId,
             updated_at: new Date().toISOString(),
           })
-          .eq('stripe_session_id', session.id);
+          .eq('stripe_checkout_session_id', session.id);
 
         if (paymentError) {
           console.error('Payment update error:', paymentError);
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
             status: 'failed',
             updated_at: new Date().toISOString(),
           })
-          .eq('stripe_session_id', session.id);
+          .eq('stripe_checkout_session_id', session.id);
         break;
       }
 

@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS attempts (
 CREATE TABLE IF NOT EXISTS payments (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     attempt_id UUID REFERENCES attempts(id) ON DELETE CASCADE,
-    stripe_payment_intent_id TEXT UNIQUE NOT NULL,
+    stripe_payment_intent_id TEXT UNIQUE,
     stripe_checkout_session_id TEXT UNIQUE NOT NULL,
     amount INTEGER NOT NULL, -- in cents
     currency TEXT DEFAULT 'eur',

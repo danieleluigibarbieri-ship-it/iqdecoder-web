@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
       .insert({
         id: paymentId,
         attempt_id: attemptId,
-        stripe_session_id: session.id,
+        stripe_checkout_session_id: session.id,
+        stripe_payment_intent_id: null,
         amount: 990,
         currency: 'eur',
         status: 'pending',
