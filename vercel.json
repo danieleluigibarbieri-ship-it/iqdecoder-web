@@ -4,21 +4,5 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": ".next",
-  "regions": ["fra1"],
-  "env": {
-    "NEXT_PUBLIC_APP_URL": "https://iqdecoder.com",
-    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "@stripe_publishable_key",
-    "STRIPE_SECRET_KEY": "@stripe_secret_key",
-    "STRIPE_WEBHOOK_SECRET": "@stripe_webhook_secret",
-    "DATABASE_URL": "@database_url",
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
-    "EMAIL_FROM": "danieleluigibarbieri@gmail.com",
-    "SMTP_HOST": "smtp.gmail.com",
-    "SMTP_PORT": "587",
-    "SMTP_USER": "danieleluigibarbieri@gmail.com",
-    "SMTP_PASS": "@smtp_password",
-    "NODE_ENV": "production"
-  }
+  "regions": ["fra1"]
 }
