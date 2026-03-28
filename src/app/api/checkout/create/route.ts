@@ -11,6 +11,19 @@ const schema = z.object({
   email: z.string().email(),
 });
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+  return "Unknown error";
+}
+
+function extractMissingColumn(message: string): string | null {
+  const match = message.match(/Could not find the '([^']+)' column/);
+  return match?.[1] ?? null;
+}
+
 export async function POST(req: Request) {
   try {
     const parsed = schema.parse(await req.json());
@@ -20,7 +33,7 @@ export async function POST(req: Request) {
 
     const { data: attempt, error: attemptError } = await supabase
       .from("iq_attempts")
-      .select("id, public_token, status, locale")
+      .select("*")
       .eq("public_token", parsed.publicToken)
       .single();
 
@@ -28,22 +41,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Attempt not found" }, { status: 404 });
     }
 
-    if (attempt.status !== "completed" && attempt.status !== "paid") {
-      return NextResponse.json({ ok: false, error: "Attempt is not ready for checkout" }, { status: 409 });
-    }
+    const attemptStatus = typeof attempt.status === "string" ? attempt.status : "completed";
+    const attemptLocale = attempt.locale === "it" ? "it" : "en";
+    const attemptToken = typeof attempt.public_token === "string" ? attempt.public_token : parsed.publicToken;
 
-    if (attempt.status === "paid") {
+    if (attemptStatus === "paid") {
       return NextResponse.json({
         ok: true,
         alreadyPaid: true,
-        resultUrl: `${appUrl}/result/${attempt.public_token}`,
+        resultUrl: `${appUrl}/result/${attemptToken}`,
       });
     }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      success_url: `${appUrl}/result/${attempt.public_token}?status=success`,
-      cancel_url: `${appUrl}/checkout/${attempt.public_token}?status=cancel`,
+      success_url: `${appUrl}/result/${attemptToken}?status=success`,
+      cancel_url: `${appUrl}/checkout/${attemptToken}?status=cancel`,
       customer_email: parsed.email.toLowerCase(),
       line_items: [
         {
@@ -53,33 +66,37 @@ export async function POST(req: Request) {
             unit_amount: PRICE_EUR_CENTS,
             product_data: {
               name: "IQ Decoder Premium Report",
-              description: attempt.locale === "it" ? "Report premium completo con PDF" : "Full premium report with PDF",
+              description: attemptLocale === "it" ? "Report premium completo con PDF" : "Full premium report with PDF",
             },
           },
         },
       ],
       metadata: {
         attempt_id: attempt.id,
-        public_token: attempt.public_token,
+        public_token: attemptToken,
         full_name: parsed.fullName,
       },
     });
 
-    const { error: updateError } = await supabase
-      .from("iq_attempts")
-      .update({
-        email: parsed.email.toLowerCase(),
-        stripe_checkout_session_id: session.id,
-        amount_cents: PRICE_EUR_CENTS,
-        currency: "eur",
-      })
-      .eq("id", attempt.id);
+    const updatePayload: Record<string, unknown> = {
+      email: parsed.email.toLowerCase(),
+      stripe_checkout_session_id: session.id,
+      amount_cents: PRICE_EUR_CENTS,
+      currency: "eur",
+    };
 
-    if (updateError) throw updateError;
+    for (let i = 0; i < 6; i += 1) {
+      const updateRes = await supabase.from("iq_attempts").update(updatePayload).eq("id", attempt.id);
+      if (!updateRes.error) break;
+
+      const missing = extractMissingColumn(getErrorMessage(updateRes.error));
+      if (!missing || !(missing in updatePayload)) throw updateRes.error;
+      delete updatePayload[missing];
+    }
 
     return NextResponse.json({ ok: true, url: session.url });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = getErrorMessage(error);
     const status = message.startsWith("Missing environment variable:") ? 503 : 400;
     return NextResponse.json(
       { ok: false, error: message },

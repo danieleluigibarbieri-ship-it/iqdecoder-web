@@ -4,6 +4,19 @@ import { getStripeWebhookSecret } from "@/lib/env";
 import { getStripe } from "@/lib/stripe";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+  return "Unknown error";
+}
+
+function extractMissingColumn(message: string): string | null {
+  const match = message.match(/Could not find the '([^']+)' column/);
+  return match?.[1] ?? null;
+}
+
 export async function POST(req: Request) {
   try {
     const webhookSecret = getStripeWebhookSecret();
@@ -41,22 +54,27 @@ export async function POST(req: Request) {
         if (current && current.status !== "paid") {
           const paymentIntentId =
             typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
-          const { error } = await supabase
-            .from("iq_attempts")
-            .update({
-              status: "paid",
-              paid_at: new Date().toISOString(),
-              stripe_payment_intent_id: paymentIntentId,
-            })
-            .eq("id", attemptId);
-          if (error) throw error;
+          const updatePayload: Record<string, unknown> = {
+            status: "paid",
+            paid_at: new Date().toISOString(),
+            stripe_payment_intent_id: paymentIntentId,
+          };
+
+          for (let i = 0; i < 6; i += 1) {
+            const updateRes = await supabase.from("iq_attempts").update(updatePayload).eq("id", attemptId);
+            if (!updateRes.error) break;
+
+            const missing = extractMissingColumn(getErrorMessage(updateRes.error));
+            if (!missing || !(missing in updatePayload)) throw updateRes.error;
+            delete updatePayload[missing];
+          }
         }
       }
     }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = getErrorMessage(error);
     const status = message.startsWith("Missing environment variable:") ? 503 : 400;
     return NextResponse.json(
       { ok: false, error: message },

@@ -14,6 +14,19 @@ const submitSchema = z.object({
 
 type Breakdown = Record<QuestionCategory, { correct: number; total: number }>;
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
+    return error.message;
+  }
+  return "Unknown error";
+}
+
+function extractMissingColumn(message: string): string | null {
+  const match = message.match(/Could not find the '([^']+)' column/);
+  return match?.[1] ?? null;
+}
+
 export async function POST(req: Request) {
   try {
     const parsed = submitSchema.parse(await req.json());
@@ -27,29 +40,45 @@ export async function POST(req: Request) {
 
     const publicToken = uuidv4();
 
-    const { data, error } = await supabase
-      .from("iq_attempts")
-      .insert({
-        public_token: publicToken,
-        locale: parsed.locale as Lang,
-        gender: parsed.gender ?? null,
-        status: "completed",
-        question_set_version: QUESTION_SET_VERSION,
-        submitted_at: new Date().toISOString(),
-        duration_sec: parsed.durationSec,
-        answers: parsed.answers,
-        score_total: evaluation.totalCorrect,
-        score_breakdown: breakdown,
-        analysis: evaluation,
-      })
-      .select("id, public_token")
-      .single();
+    const insertPayload: Record<string, unknown> = {
+      public_token: publicToken,
+      locale: parsed.locale as Lang,
+      gender: parsed.gender ?? null,
+      question_set_version: QUESTION_SET_VERSION,
+      submitted_at: new Date().toISOString(),
+      duration_sec: parsed.durationSec,
+      answers: parsed.answers,
+      score_total: evaluation.totalCorrect,
+      score_breakdown: breakdown,
+      analysis: evaluation,
+    };
 
-    if (error) throw error;
+    let data: { id: string; public_token: string } | null = null;
+    let insertError: unknown = null;
+
+    for (let i = 0; i < 10; i += 1) {
+      const attempt = await supabase.from("iq_attempts").insert(insertPayload).select("id, public_token").single();
+      if (!attempt.error) {
+        data = attempt.data;
+        insertError = null;
+        break;
+      }
+
+      const missing = extractMissingColumn(getErrorMessage(attempt.error));
+      if (!missing || !(missing in insertPayload)) {
+        insertError = attempt.error;
+        break;
+      }
+
+      delete insertPayload[missing];
+      insertError = attempt.error;
+    }
+
+    if (!data || insertError) throw insertError;
 
     return NextResponse.json({ ok: true, attemptId: data.id, publicToken: data.public_token });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const message = getErrorMessage(error);
     const status = message.startsWith("Missing environment variable:") ? 503 : 400;
     return NextResponse.json(
       { ok: false, error: message },
