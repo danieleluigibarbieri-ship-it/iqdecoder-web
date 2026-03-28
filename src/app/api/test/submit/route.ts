@@ -49,9 +49,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, attemptId: data.id, publicToken: data.public_token });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const status = message.startsWith("Missing environment variable:") ? 503 : 400;
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 400 },
+      { ok: false, error: message },
+      { status },
     );
   }
 }

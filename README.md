@@ -35,7 +35,7 @@ Required variables:
 
 3. Create DB table in Supabase:
 
-- Execute [supabase/schema.sql](/c:/Users/danib/Desktop/openclaw/openclaw-workspace/projects/iq-test/iqdecoder-web/supabase/schema.sql)
+- Execute `supabase/schema.sql`
 
 4. Run app
 

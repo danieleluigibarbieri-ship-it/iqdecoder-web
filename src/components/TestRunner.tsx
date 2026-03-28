@@ -108,7 +108,10 @@ function loadProgress(): SavedProgress | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as SavedProgress;
-    if (parsed.answers.length !== QUESTIONS.length) return null;
+    if (!Array.isArray(parsed.answers) || parsed.answers.length !== QUESTIONS.length) return null;
+    if (typeof parsed.index !== "number" || parsed.index < 0 || parsed.index >= QUESTIONS.length) return null;
+    if (typeof parsed.timeLeft !== "number" || parsed.timeLeft < 0 || parsed.timeLeft > TEST_MINUTES * 60) return null;
+    if (parsed.answers.some((value) => typeof value !== "number" || value < -1 || value > 3)) return null;
     return parsed;
   } catch {
     window.localStorage.removeItem(STORAGE_KEY);

@@ -30,9 +30,11 @@ export async function GET(_: Request, { params }: Params) {
       downloadUrl: locked ? null : attempt.report_pdf_url,
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const status = message.startsWith("Missing environment variable:") ? 503 : 400;
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 400 },
+      { ok: false, error: message },
+      { status },
     );
   }
 }
