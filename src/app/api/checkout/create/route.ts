@@ -28,6 +28,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Attempt not found" }, { status: 404 });
     }
 
+    if (attempt.status !== "completed" && attempt.status !== "paid") {
+      return NextResponse.json({ ok: false, error: "Attempt is not ready for checkout" }, { status: 409 });
+    }
+
     if (attempt.status === "paid") {
       return NextResponse.json({
         ok: true,

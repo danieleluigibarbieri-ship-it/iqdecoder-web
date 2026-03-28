@@ -39,9 +39,15 @@ export async function POST(req: Request) {
           .single();
 
         if (current && current.status !== "paid") {
+          const paymentIntentId =
+            typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
           const { error } = await supabase
             .from("iq_attempts")
-            .update({ status: "paid", paid_at: new Date().toISOString() })
+            .update({
+              status: "paid",
+              paid_at: new Date().toISOString(),
+              stripe_payment_intent_id: paymentIntentId,
+            })
             .eq("id", attemptId);
           if (error) throw error;
         }

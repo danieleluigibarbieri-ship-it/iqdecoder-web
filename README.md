@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IQ Decoder Web
 
-## Getting Started
+Conversion-first IQ test funnel built with Next.js, Stripe, and Supabase.
 
-First, run the development server:
+Flow:
+
+`/` (pre-test) -> `/test` (20 questions) -> `/checkout/[publicToken]` -> Stripe Checkout -> webhook -> `/result/[publicToken]` unlock
+
+## Stack
+
+- Next.js 16 (App Router + TypeScript)
+- Stripe Checkout + Webhook
+- Supabase (attempt storage)
+- CSS Modules
+
+## Local setup
+
+1. Install deps
+
+```bash
+npm ci --include=dev
+```
+
+2. Create `.env.local` from `.env.example`
+
+Required variables:
+
+- `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+
+3. Create DB table in Supabase:
+
+- Execute [supabase/schema.sql](/c:/Users/danib/Desktop/openclaw/openclaw-workspace/projects/iq-test/iqdecoder-web/supabase/schema.sql)
+
+4. Run app
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Webhook local testing (Stripe CLI)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Start app:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev
+```
 
-## Learn More
+2. Forward Stripe events:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Copy generated signing secret into `STRIPE_WEBHOOK_SECRET`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Commands
 
-## Deploy on Vercel
+- `npm run lint`
+- `npm test`
+- `npm run build`
+- `npm run start`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API endpoints
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `GET /api/health`
+- `POST /api/test/submit`
+- `POST /api/checkout/create`
+- `POST /api/stripe/webhook`
+- `GET /api/result/[publicToken]`
+
+## Expected smoke checks
+
+- `GET /`, `/test`, `/pricing`, `/faq`
+- `GET /api/health`
+- `POST /api/test/submit`
+- `POST /api/checkout/create`
+
+Without env variables, API checks are expected to fail with explicit error messages.
+
+## Vercel deploy notes
+
+Set all env vars in Vercel Project Settings, then deploy:
+
+```bash
+vercel --prod
+```
+
+After deploy, confirm:
+
+1. Checkout creates Stripe session
+2. Stripe webhook reaches `/api/stripe/webhook`
+3. Attempt status moves to `paid`
+4. `/result/[publicToken]` unlocks analysis
