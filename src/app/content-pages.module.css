@@ -1,0 +1,103 @@
+.page {
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+  background:
+    radial-gradient(80rem 40rem at 95% -20%, rgba(45, 127, 249, 0.2), transparent 65%),
+    radial-gradient(70rem 35rem at -10% 110%, rgba(245, 166, 35, 0.16), transparent 65%),
+    #eef3ff;
+}
+
+.card {
+  width: min(880px, 96vw);
+  margin: 0 auto;
+  border-radius: 1.25rem;
+  border: 1px solid #cdd8f0;
+  background: #fff;
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+  box-shadow: 0 20px 45px rgba(10, 22, 40, 0.1);
+}
+
+.badge {
+  display: inline-block;
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2d7ff9;
+  letter-spacing: 0.08em;
+}
+
+.title {
+  margin: 0;
+  color: #0a1628;
+  line-height: 1.1;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+
+.subtitle {
+  margin: 0.8rem 0 1.5rem;
+  color: #2f4768;
+  font-size: clamp(1rem, 2.4vw, 1.15rem);
+}
+
+.sectionTitle {
+  margin: 1.35rem 0 0.55rem;
+  color: #112742;
+  font-size: 1.08rem;
+}
+
+.list {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #1f3959;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.faqList {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.faq {
+  border: 1px solid #d8e1f4;
+  border-radius: 0.9rem;
+  background: #f8fbff;
+  padding: 0.95rem 1rem;
+}
+
+.faq h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  color: #112742;
+}
+
+.faq p {
+  margin: 0;
+  color: #2f4768;
+}
+
+.actions {
+  margin-top: 1.6rem;
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.primary {
+  border: 0;
+  background: linear-gradient(145deg, #2d7ff9, #2f63ee);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.76rem 1.15rem;
+  border-radius: 999px;
+}
+
+.secondary {
+  border: 1px solid #cad8f3;
+  background: #fff;
+  color: #193559;
+  font-weight: 600;
+  padding: 0.76rem 1.15rem;
+  border-radius: 999px;
+}

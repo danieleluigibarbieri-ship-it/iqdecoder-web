@@ -1,0 +1,22 @@
+﻿.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.btn,
+.active {
+  border: 1px solid #0f8f86;
+  border-radius: 12px;
+  background: #0f8f86;
+  color: #fff;
+  min-width: 150px;
+  padding: 0.72rem 1.2rem;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.active {
+  background: #0a746e;
+}

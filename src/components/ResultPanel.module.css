@@ -1,0 +1,46 @@
+﻿.card {
+  width: min(760px, 94vw);
+  margin: 1.4rem auto 2.4rem;
+  border: 1px solid #d4ddee;
+  border-radius: 16px;
+  background: #fff;
+  padding: 1rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.card h1,
+.card h2,
+.card p,
+.card ul {
+  margin: 0;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.metrics article {
+  border: 1px solid #d7e1f0;
+  border-radius: 10px;
+  background: #f8fbff;
+  padding: 0.6rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.metrics strong {
+  color: #1e58bf;
+  font-size: 1.4rem;
+}
+
+.primaryLink {
+  width: fit-content;
+  border-radius: 10px;
+  padding: 0.65rem 0.95rem;
+  background: #2d7ff9;
+  color: #fff;
+  font-weight: 700;
+}

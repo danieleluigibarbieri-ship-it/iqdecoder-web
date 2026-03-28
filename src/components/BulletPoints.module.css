@@ -1,0 +1,25 @@
+﻿.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+  width: min(760px, 100%);
+  text-align: left;
+}
+
+.list li {
+  position: relative;
+  padding-left: 1.8rem;
+  color: #435878;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+}
+
+.list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: -0.05rem;
+  color: #5f7394;
+  font-weight: 900;
+}

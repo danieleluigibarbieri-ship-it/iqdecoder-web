@@ -1,0 +1,23 @@
+﻿.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.btn,
+.active {
+  border: 1px solid #c9d4ea;
+  border-radius: 10px;
+  background: #fff;
+  color: #37517d;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.active {
+  background: #2d7ff9;
+  border-color: #2d7ff9;
+  color: #fff;
+}

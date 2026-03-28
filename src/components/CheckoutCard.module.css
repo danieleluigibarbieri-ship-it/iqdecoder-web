@@ -1,0 +1,64 @@
+﻿.card {
+  width: min(760px, 94vw);
+  margin: 1.4rem auto 2.4rem;
+  border: 1px solid #d4ddee;
+  border-radius: 16px;
+  background: #fff;
+  padding: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.badge {
+  width: fit-content;
+  margin: 0;
+  border: 1px solid #cad8ef;
+  border-radius: 999px;
+  background: #ebf2ff;
+  color: #1e58bf;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.card h1 {
+  margin: 0;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #d8e1f0;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+}
+
+.priceRow strong {
+  color: #1e58bf;
+}
+
+.field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.field input {
+  border: 1px solid #ccd8ec;
+  border-radius: 10px;
+  padding: 0.65rem;
+}
+
+.primary {
+  border: 0;
+  border-radius: 10px;
+  background: #2d7ff9;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.7rem 1rem;
+}
+
+.error {
+  color: #ba2e4c;
+  margin: 0;
+}

@@ -1,0 +1,8 @@
+﻿.text {
+  margin: 0 auto;
+  width: min(980px, 96%);
+  text-align: center;
+  color: #4f6284;
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
