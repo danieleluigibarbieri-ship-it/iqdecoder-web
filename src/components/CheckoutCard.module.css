@@ -1,4 +1,4 @@
-﻿.card {
+.card {
   width: min(760px, 94vw);
   margin: 1.4rem auto 2.4rem;
   border: 1px solid #d4ddee;
@@ -6,7 +6,7 @@
   background: #fff;
   padding: 1rem;
   display: grid;
-  gap: 0.65rem;
+  gap: 0.8rem;
 }
 
 .badge {
@@ -21,8 +21,89 @@
   font-weight: 700;
 }
 
-.card h1 {
+.card h1,
+.card p {
   margin: 0;
+}
+
+.loadingWrap {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.progressTrack {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: #e3eaf7;
+  overflow: hidden;
+}
+
+.progressTrack span {
+  display: block;
+  height: 100%;
+  background: #2d7ff9;
+  transition: width 0.15s linear;
+}
+
+.progressLabel {
+  color: #4f6689;
+  font-size: 0.9rem;
+}
+
+.popup {
+  border: 1px solid #d8e1f0;
+  border-radius: 12px;
+  background: #f8fbff;
+  padding: 0.8rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.popupTitle {
+  font-weight: 700;
+  color: #214671;
+}
+
+.popupActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.popupBtn {
+  border: 1px solid #c7d6ee;
+  border-radius: 10px;
+  background: #fff;
+  color: #244b79;
+  font-weight: 700;
+  padding: 0.5rem 0.75rem;
+}
+
+.flowBlock {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.blockTitle {
+  color: #284e7d;
+  font-weight: 700;
+}
+
+.fieldBlock {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.field input {
+  border: 1px solid #ccd8ec;
+  border-radius: 10px;
+  padding: 0.65rem;
 }
 
 .priceRow {
@@ -38,17 +119,6 @@
   color: #1e58bf;
 }
 
-.field {
-  display: grid;
-  gap: 0.3rem;
-}
-
-.field input {
-  border: 1px solid #ccd8ec;
-  border-radius: 10px;
-  padding: 0.65rem;
-}
-
 .primary {
   border: 0;
   border-radius: 10px;
@@ -60,5 +130,4 @@
 
 .error {
   color: #ba2e4c;
-  margin: 0;
 }

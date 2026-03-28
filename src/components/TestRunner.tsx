@@ -177,6 +177,24 @@ export function TestRunner() {
     [answers, gender, language, router, submitting, t, timeLeft, unanswered],
   );
 
+  const handleSelectAnswer = useCallback(
+    (choiceIndex: number) => {
+      if (submitting) return;
+
+      const nextAnswers = [...answers];
+      nextAnswers[index] = choiceIndex;
+      setAnswers(nextAnswers);
+
+      if (index === QUESTIONS.length - 1) {
+        void submit(false);
+        return;
+      }
+
+      setIndex((v) => Math.min(QUESTIONS.length - 1, v + 1));
+    },
+    [answers, index, submit, submitting],
+  );
+
   useEffect(() => {
     const payload: SavedProgress = { index, answers, timeLeft };
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -241,11 +259,7 @@ export function TestRunner() {
           {current.options[language].map((option, idx) => (
             <button
               key={option}
-              onClick={() => {
-                const next = [...answers];
-                next[index] = idx;
-                setAnswers(next);
-              }}
+              onClick={() => handleSelectAnswer(idx)}
               className={answers[index] === idx ? styles.answerActive : styles.answer}
               disabled={submitting}
             >
@@ -259,19 +273,9 @@ export function TestRunner() {
           <button onClick={() => setIndex((v) => Math.max(0, v - 1))} disabled={index === 0 || submitting}>
             {t.back}
           </button>
-          {index === QUESTIONS.length - 1 ? (
-            <button className={styles.primary} onClick={() => void submit(false)} disabled={submitting}>
-              {t.finish}
-            </button>
-          ) : (
-            <button
-              className={styles.primary}
-              onClick={() => setIndex((v) => Math.min(QUESTIONS.length - 1, v + 1))}
-              disabled={answers[index] < 0 || submitting}
-            >
-              {t.continue}
-            </button>
-          )}
+          <button className={styles.primary} onClick={() => void submit(false)} disabled={submitting}>
+            {t.finish}
+          </button>
         </div>
       </article>
     </section>
