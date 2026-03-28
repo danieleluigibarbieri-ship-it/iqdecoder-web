@@ -62,6 +62,7 @@ export async function GET(_: Request, { params }: Params) {
     return NextResponse.json({
       ok: true,
       locked,
+      status: typeof attempt.status === "string" ? attempt.status : null,
       locale,
       analysis: locked ? null : analysis,
       downloadUrl: locked ? null : downloadUrl,

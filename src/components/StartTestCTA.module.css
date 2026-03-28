@@ -1,20 +1,21 @@
-﻿.btn,
+.btn,
 .disabled {
-  border-radius: 999px;
+  width: 100%;
+  border-radius: 10px;
   border: 0;
-  padding: 0.8rem 1.3rem;
-  min-width: 180px;
-  font-size: 1rem;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.98rem;
   font-weight: 800;
+  transition: background 0.2s ease;
 }
 
 .btn {
-  color: #fff;
-  background: linear-gradient(130deg, #2d7ff9, #185bd3);
-  box-shadow: 0 12px 24px rgba(45, 127, 249, 0.35);
+  color: #ffffff;
+  background: #2d7ff9;
 }
 
 .disabled {
-  color: #6e7f9f;
-  background: #dbe4f3;
+  color: #7b8fac;
+  background: #d5dfef;
 }

@@ -1,22 +1,32 @@
-﻿.row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.6rem;
+.row {
+  width: 100%;
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .btn,
 .active {
-  border: 1px solid #0f8f86;
-  border-radius: 12px;
-  background: #0f8f86;
-  color: #fff;
-  min-width: 150px;
-  padding: 0.72rem 1.2rem;
+  border-radius: 10px;
+  border: 1px solid #ccd7e8;
+  min-height: 2.9rem;
+  padding: 0.62rem 0.9rem;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.92rem;
+  transition: all 0.2s ease;
+}
+
+.btn {
+  background: #fff;
+  color: #2f4a6c;
+}
+
+.btn:hover {
+  border-color: #95abca;
 }
 
 .active {
-  background: #0a746e;
+  border-color: #2d7ff9;
+  background: #eaf2ff;
+  color: #174174;
 }

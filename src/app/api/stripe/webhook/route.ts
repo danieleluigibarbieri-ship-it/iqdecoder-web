@@ -43,31 +43,35 @@ export async function POST(req: Request) {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       const attemptId = session.metadata?.attempt_id;
+      const publicToken = session.metadata?.public_token;
+
+      let current: { id: string; status: string | null } | null = null;
 
       if (attemptId) {
-        const { data: current } = await supabase
-          .from("iq_attempts")
-          .select("id, status")
-          .eq("id", attemptId)
-          .single();
+        const byId = await supabase.from("iq_attempts").select("id, status").eq("id", attemptId).single();
+        current = byId.data ?? null;
+      }
 
-        if (current && current.status !== "paid") {
-          const paymentIntentId =
-            typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
-          const updatePayload: Record<string, unknown> = {
-            status: "paid",
-            paid_at: new Date().toISOString(),
-            stripe_payment_intent_id: paymentIntentId,
-          };
+      if (!current && publicToken) {
+        const byToken = await supabase.from("iq_attempts").select("id, status").eq("public_token", publicToken).single();
+        current = byToken.data ?? null;
+      }
 
-          for (let i = 0; i < 6; i += 1) {
-            const updateRes = await supabase.from("iq_attempts").update(updatePayload).eq("id", attemptId);
-            if (!updateRes.error) break;
+      if (current && current.status !== "paid") {
+        const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
+        const updatePayload: Record<string, unknown> = {
+          status: "paid",
+          paid_at: new Date().toISOString(),
+          stripe_payment_intent_id: paymentIntentId,
+        };
 
-            const missing = extractMissingColumn(getErrorMessage(updateRes.error));
-            if (!missing || !(missing in updatePayload)) throw updateRes.error;
-            delete updatePayload[missing];
-          }
+        for (let i = 0; i < 6; i += 1) {
+          const updateRes = await supabase.from("iq_attempts").update(updatePayload).eq("id", current.id);
+          if (!updateRes.error) break;
+
+          const missing = extractMissingColumn(getErrorMessage(updateRes.error));
+          if (!missing || !(missing in updatePayload)) throw updateRes.error;
+          delete updatePayload[missing];
         }
       }
     }

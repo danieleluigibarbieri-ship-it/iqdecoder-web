@@ -1,4 +1,4 @@
-﻿.wrap {
+.wrap {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
@@ -7,13 +7,18 @@
 
 .btn,
 .active {
-  border: 1px solid #c9d4ea;
-  border-radius: 10px;
-  background: #fff;
-  color: #37517d;
+  border: 1px solid #c7d2e4;
+  border-radius: 999px;
+  min-width: 2.1rem;
   padding: 0.3rem 0.55rem;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
+  transition: background 0.18s ease;
+}
+
+.btn {
+  background: #fff;
+  color: #5a6e8c;
 }
 
 .active {

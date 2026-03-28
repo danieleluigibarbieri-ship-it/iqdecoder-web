@@ -27,6 +27,10 @@ function extractMissingColumn(message: string): string | null {
   return match?.[1] ?? null;
 }
 
+function hasLocaleConstraintViolation(message: string): boolean {
+  return message.includes("iq_attempts_locale_check");
+}
+
 export async function POST(req: Request) {
   try {
     const parsed = submitSchema.parse(await req.json());
@@ -65,7 +69,14 @@ export async function POST(req: Request) {
         break;
       }
 
-      const missing = extractMissingColumn(getErrorMessage(attempt.error));
+      const message = getErrorMessage(attempt.error);
+      const missing = extractMissingColumn(message);
+
+      if (hasLocaleConstraintViolation(message) && insertPayload.locale !== "en" && insertPayload.locale !== "it") {
+        insertPayload.locale = "en";
+        continue;
+      }
+
       if (!missing || !(missing in insertPayload)) {
         insertError = attempt.error;
         break;

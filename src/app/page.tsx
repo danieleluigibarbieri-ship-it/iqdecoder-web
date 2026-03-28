@@ -1,8 +1,6 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
-import { BulletPoints } from "@/components/BulletPoints";
-import { Disclaimer } from "@/components/Disclaimer";
 import { GenderSelector } from "@/components/GenderSelector";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { StartTestCTA } from "@/components/StartTestCTA";
@@ -18,27 +16,34 @@ export default function HomePage() {
   return (
     <main className={styles.page}>
       <header className={styles.topBar}>
-        <div className={styles.brand}>IQ Decoder</div>
+        <div className={styles.brandWrap}>
+          <div className={styles.brandMark}>IQ</div>
+          <div>
+            <p className={styles.brandName}>IQ Decoder</p>
+            <p className={styles.brandTag}>Simple IQ test flow</p>
+          </div>
+        </div>
         <LanguageSelector />
       </header>
 
-      <section className={styles.mainWrap}>
-        <article className={styles.card}>
-          <div className={styles.icon}>IQ</div>
+      <section className={styles.shell}>
+        <article className={styles.copyCol}>
+          <p className={styles.kicker}>{t.kicker}</p>
           <h1>{t.title}</h1>
+          <p className={styles.subtitle}>{t.subtitle}</p>
+        </article>
 
-          <BulletPoints items={t.bullets} />
-
+        <article className={styles.actionCard}>
           <p className={styles.choose}>{t.chooseGender}</p>
           <GenderSelector maleLabel={t.male} femaleLabel={t.female} value={gender} onChange={setGender} />
 
           <p className={styles.hint}>{t.hint}</p>
-
           <StartTestCTA label={t.start} disabled={!gender} gender={gender} />
+          <p className={styles.trust}>{t.trustLine}</p>
         </article>
-
-        <Disclaimer text={t.disclaimer} />
       </section>
+
+      <p className={styles.disclaimer}>{t.disclaimer}</p>
     </main>
   );
 }

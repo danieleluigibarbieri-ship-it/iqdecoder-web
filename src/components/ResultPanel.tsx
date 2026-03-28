@@ -7,6 +7,7 @@ import styles from "./ResultPanel.module.css";
 type ResultPayload = {
   ok: boolean;
   locked?: boolean;
+  status?: string | null;
   locale?: string;
   analysis?: {
     estimatedIq: number;
@@ -25,6 +26,8 @@ export function ResultPanel({ publicToken, locale }: { publicToken: string; loca
   const [data, setData] = useState<ResultPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(false);
+  const [pollAttempts, setPollAttempts] = useState(0);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -34,12 +37,20 @@ export function ResultPanel({ publicToken, locale }: { publicToken: string; loca
         const res = await fetch(`/api/result/${publicToken}`, { cache: "no-store" });
         const json = (await res.json()) as ResultPayload;
         if (!mounted) return json;
+
+        if (!res.ok || !json.ok) {
+          setFetchError("Result endpoint returned an error.");
+        } else {
+          setFetchError(null);
+        }
+
         setData(json);
         setLoading(false);
         return json;
       } catch {
         if (!mounted) return { ok: false } as ResultPayload;
         setData({ ok: false });
+        setFetchError("Network error while loading result.");
         setLoading(false);
         return { ok: false } as ResultPayload;
       }
@@ -49,12 +60,16 @@ export function ResultPanel({ publicToken, locale }: { publicToken: string; loca
       const first = await fetchResult();
       if (paidCallback && first.ok && first.locked) {
         setPolling(true);
-        for (let i = 0; i < 8; i += 1) {
-          await new Promise((resolve) => setTimeout(resolve, 1500));
+        for (let i = 0; i < 24; i += 1) {
+          if (!mounted) break;
+          setPollAttempts(i + 1);
+          await new Promise((resolve) => setTimeout(resolve, 2500));
           const retry = await fetchResult();
           if (retry.ok && !retry.locked) break;
         }
-        if (mounted) setPolling(false);
+        if (mounted) {
+          setPolling(false);
+        }
       }
     }
 
@@ -63,6 +78,23 @@ export function ResultPanel({ publicToken, locale }: { publicToken: string; loca
       mounted = false;
     };
   }, [paidCallback, publicToken]);
+
+  async function handleManualRefresh() {
+    setLoading(true);
+    setFetchError(null);
+    try {
+      const res = await fetch(`/api/result/${publicToken}`, { cache: "no-store" });
+      const json = (await res.json()) as ResultPayload;
+      setData(json);
+      if (!res.ok || !json.ok) {
+        setFetchError("Result endpoint returned an error.");
+      }
+    } catch {
+      setFetchError("Network error while loading result.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -76,6 +108,10 @@ export function ResultPanel({ publicToken, locale }: { publicToken: string; loca
     return (
       <section className={styles.card}>
         <h1>Result not available</h1>
+        {fetchError ? <p>{fetchError}</p> : null}
+        <button className={styles.secondaryBtn} onClick={() => void handleManualRefresh()}>
+          Retry
+        </button>
       </section>
     );
   }
@@ -84,10 +120,20 @@ export function ResultPanel({ publicToken, locale }: { publicToken: string; loca
     return (
       <section className={styles.card}>
         <h1>Result locked</h1>
-        <p>{polling ? "Payment received, finalizing unlock..." : "Complete payment to unlock your full report."}</p>
-        <a href={`/checkout/${publicToken}`} className={styles.primaryLink}>
-          Go to checkout
-        </a>
+        <p>
+          {polling
+            ? `Payment received. Waiting for confirmation (${pollAttempts}/24)...`
+            : "Complete payment to unlock your full report."}
+        </p>
+        {paidCallback ? (
+          <button className={styles.secondaryBtn} onClick={() => void handleManualRefresh()}>
+            Check again
+          </button>
+        ) : (
+          <a href={`/checkout/${publicToken}`} className={styles.primaryLink}>
+            Go to checkout
+          </a>
+        )}
       </section>
     );
   }

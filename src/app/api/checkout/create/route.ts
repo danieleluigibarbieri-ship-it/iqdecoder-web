@@ -11,6 +11,14 @@ const schema = z.object({
   email: z.string().email(),
 });
 
+const PRODUCT_DESCRIPTION_BY_LOCALE: Record<string, string> = {
+  en: "Full premium report with PDF",
+  it: "Report premium completo con PDF",
+  fr: "Rapport premium complet avec PDF",
+  de: "Vollstandiger Premium-Bericht mit PDF",
+  es: "Informe premium completo con PDF",
+};
+
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
@@ -42,8 +50,9 @@ export async function POST(req: Request) {
     }
 
     const attemptStatus = typeof attempt.status === "string" ? attempt.status : "completed";
-    const attemptLocale = attempt.locale === "it" ? "it" : "en";
+    const attemptLocale = typeof attempt.locale === "string" ? attempt.locale : "en";
     const attemptToken = typeof attempt.public_token === "string" ? attempt.public_token : parsed.publicToken;
+    const productDescription = PRODUCT_DESCRIPTION_BY_LOCALE[attemptLocale] ?? PRODUCT_DESCRIPTION_BY_LOCALE.en;
 
     if (attemptStatus === "paid") {
       return NextResponse.json({
@@ -51,6 +60,13 @@ export async function POST(req: Request) {
         alreadyPaid: true,
         resultUrl: `${appUrl}/result/${attemptToken}`,
       });
+    }
+
+    if (typeof attempt.stripe_checkout_session_id === "string" && attempt.stripe_checkout_session_id.length > 0) {
+      const existingSession = await stripe.checkout.sessions.retrieve(attempt.stripe_checkout_session_id);
+      if (existingSession.status === "open" && existingSession.url) {
+        return NextResponse.json({ ok: true, url: existingSession.url, reused: true });
+      }
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -66,7 +82,7 @@ export async function POST(req: Request) {
             unit_amount: PRICE_EUR_CENTS,
             product_data: {
               name: "IQ Decoder Premium Report",
-              description: attemptLocale === "it" ? "Report premium completo con PDF" : "Full premium report with PDF",
+              description: productDescription,
             },
           },
         },
@@ -92,6 +108,10 @@ export async function POST(req: Request) {
       const missing = extractMissingColumn(getErrorMessage(updateRes.error));
       if (!missing || !(missing in updatePayload)) throw updateRes.error;
       delete updatePayload[missing];
+    }
+
+    if (!session.url) {
+      return NextResponse.json({ ok: false, error: "Stripe checkout URL not available" }, { status: 502 });
     }
 
     return NextResponse.json({ ok: true, url: session.url });
