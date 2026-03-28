@@ -43,6 +43,7 @@ export async function POST(req: Request) {
     const insertPayload: Record<string, unknown> = {
       public_token: publicToken,
       locale: parsed.locale as Lang,
+      status: "completed",
       gender: parsed.gender ?? null,
       question_set_version: QUESTION_SET_VERSION,
       submitted_at: new Date().toISOString(),
