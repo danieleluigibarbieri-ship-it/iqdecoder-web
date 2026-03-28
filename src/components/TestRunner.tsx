@@ -128,6 +128,8 @@ export function TestRunner() {
   const [timeLeft, setTimeLeft] = useState(initial?.timeLeft ?? TEST_MINUTES * 60);
   const [submitting, setSubmitting] = useState(false);
   const [timeoutNotice, setTimeoutNotice] = useState(false);
+  const [autoSubmitted, setAutoSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const gender = searchParams.get("gender");
   const current = QUESTIONS[index];
@@ -144,7 +146,7 @@ export function TestRunner() {
       }
 
       setSubmitting(true);
-      window.localStorage.removeItem(STORAGE_KEY);
+      setSubmitError(null);
       try {
         const res = await fetch("/api/test/submit", {
           method: "POST",
@@ -162,8 +164,10 @@ export function TestRunner() {
           throw new Error(data.error || "Submit failed");
         }
 
+        window.localStorage.removeItem(STORAGE_KEY);
         router.push(`/checkout/${data.publicToken}`);
-      } catch {
+      } catch (error) {
+        setSubmitError(error instanceof Error ? error.message : "Submit failed");
         setSubmitting(false);
       }
     },
@@ -178,17 +182,18 @@ export function TestRunner() {
   useEffect(() => {
     if (submitting) return;
     const timer = window.setTimeout(() => {
-      if (timeLeft <= 1) {
+      if (timeLeft <= 1 && !autoSubmitted) {
+        setAutoSubmitted(true);
         setTimeoutNotice(true);
         void submit(true);
         setTimeLeft(0);
-      } else {
+      } else if (timeLeft > 0) {
         setTimeLeft((v) => v - 1);
       }
     }, 1000);
 
     return () => window.clearTimeout(timer);
-  }, [submitting, submit, timeLeft]);
+  }, [autoSubmitted, submitting, submit, timeLeft]);
 
   return (
     <section className={styles.shell}>
@@ -208,6 +213,7 @@ export function TestRunner() {
       </header>
 
       {timeoutNotice ? <p className={styles.notice}>{t.timeout}</p> : null}
+      {submitError ? <p className={styles.notice}>{submitError}</p> : null}
 
       <div className={styles.stats}>
         <p>

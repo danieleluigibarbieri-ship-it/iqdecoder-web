@@ -7,6 +7,7 @@ import styles from "./ResultPanel.module.css";
 type ResultPayload = {
   ok: boolean;
   locked?: boolean;
+  locale?: string;
   analysis?: {
     estimatedIq: number;
     percentile: number;
@@ -91,7 +92,8 @@ export function ResultPanel({ publicToken, locale }: { publicToken: string; loca
     );
   }
 
-  const lang = ["en", "it", "fr", "de", "es"].includes(locale) ? locale : "en";
+  const preferredLocale = data.locale ?? locale;
+  const lang = ["en", "it", "fr", "de", "es"].includes(preferredLocale) ? preferredLocale : "en";
 
   return (
     <section className={styles.card}>

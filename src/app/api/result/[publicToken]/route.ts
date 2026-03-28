@@ -12,7 +12,7 @@ export async function GET(_: Request, { params }: Params) {
 
     const { data: attempt, error } = await supabase
       .from("iq_attempts")
-      .select("status, analysis, report_pdf_url")
+      .select("status, locale, analysis, report_pdf_url")
       .eq("public_token", publicToken)
       .single();
 
@@ -25,6 +25,7 @@ export async function GET(_: Request, { params }: Params) {
     return NextResponse.json({
       ok: true,
       locked,
+      locale: attempt.locale,
       analysis: locked ? null : attempt.analysis,
       downloadUrl: locked ? null : attempt.report_pdf_url,
     });
